@@ -14,3 +14,13 @@ body::after{bottom:0;height:env(safe-area-inset-bottom,0px)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 .note-image{display:block;max-width:100%;height:auto;border-radius:8px;margin:16px 0}
 @supports (padding: env(safe-area-inset-top)){.topbar{height:calc(72px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}@media(max-width:700px){.topbar{height:calc(62px + env(safe-area-inset-top))}}}
+.sidebar{padding-top:calc(27px + env(safe-area-inset-top,0px));padding-bottom:calc(27px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.calendar-grid{width:100%;margin-inline:auto}
+.weekday{text-align:center;padding-inline:0}
+.calendar-day{align-items:center;text-align:center}
+.calendar-day>span{align-self:center}
+.calendar-day small{width:100%;text-align:center}
+.calendar-day.chosen{background:transparent}
+.calendar-day.chosen>span{background:var(--accent);color:var(--ground)}
+.calendar-day.today:not(.chosen)>span{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+@media(max-width:700px){.calendar-day,.calendar-blank{padding-inline:0}.calendar-day>span{width:26px;height:26px}.calendar-day small{width:4px}}
