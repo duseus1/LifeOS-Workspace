@@ -18,6 +18,15 @@ test('mobile homebase fits and capture has labeled controls',async({page})=>{
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  await page.getByRole('button',{name:'Quick capture',exact:true}).click();await page.getByRole('textbox',{name:'Thought',exact:true}).fill('Save this thought');await page.getByRole('button',{name:'Save capture'}).click();await expect(page.getByRole('dialog')).not.toBeVisible();
 });
+test('note tabs stay on desktop and are hidden on phones',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/');await page.getByRole('button',{name:'Create a brain',exact:true}).click();
+ await page.getByRole('button',{name:'Daily journal',exact:true}).click();
+ await expect(page.locator('.tabs')).toBeHidden();
+ await page.getByRole('button',{name:'Go home',exact:true}).click();
+ await expect(page.locator('.tabs')).toBeHidden();
+ await page.setViewportSize({width:1100,height:800});
+ await expect(page.locator('.tabs')).toBeVisible();
+});
 test('mobile capture fields use a font size that does not trigger iOS focus zoom',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');await page.getByRole('button',{name:'Create a brain',exact:true}).click();
  await page.getByRole('button',{name:'Quick capture',exact:true}).click();
@@ -43,6 +52,16 @@ test('contact properties can be edited and found by search',async({page})=>{
  await page.getByRole('button',{name:'Edit note'}).click();await page.getByRole('textbox',{name:'Name',exact:true}).fill('Morgan Lee');await page.getByRole('textbox',{name:'Notes',exact:true}).fill('Met at the library.');await page.getByRole('button',{name:'Save contact'}).click();await expect(page.getByRole('heading',{name:'Morgan Lee'})).toBeVisible();await expect(page.getByText('Met at the library.')).toBeVisible();
  await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'All files',exact:true}).click();await page.getByRole('button',{name:/Morgan Lee/}).last().click();await expect(page.getByRole('heading',{name:'Morgan Lee'})).toBeVisible();await expect(page.getByRole('textbox',{name:'Name',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'Search',exact:true}).click();await page.getByRole('textbox',{name:'Search brain'}).fill('Morgan Lee');await expect(page.getByRole('button',{name:/Morgan Lee/}).last()).toBeVisible();
+});
+test('contact phone formatting appears in read view and survives editing',async({page})=>{
+ await page.goto('/');await page.getByRole('button',{name:'Create a brain',exact:true}).click();
+ await page.getByRole('button',{name:'Quick capture',exact:true}).click();await page.getByLabel('Capture type').selectOption('contact');
+ await page.getByRole('textbox',{name:'Name',exact:true}).fill('Alex Example');await page.getByRole('textbox',{name:'Phone',exact:true}).fill('1 202 555 0100');await page.getByRole('button',{name:'Save capture'}).click();
+ await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'Contacts',exact:true}).click();await page.getByRole('button',{name:/Alex Example/}).last().click();
+ await expect(page.getByText('+1 202-555-0100',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Edit note'}).click();await page.getByRole('textbox',{name:'Phone',exact:true}).fill('(202) 555-0100');await page.getByRole('button',{name:'Save contact'}).click();
+ await expect(page.getByText('202-555-0100',{exact:true})).toBeVisible();
+ await page.reload();await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'Contacts',exact:true}).click();await page.getByRole('button',{name:/Alex Example/}).last().click();await expect(page.getByText('202-555-0100',{exact:true})).toBeVisible();
 });
 test('dark mobile chrome covers both safe areas and stays opaque',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');await page.getByRole('button',{name:'Create a brain',exact:true}).click();

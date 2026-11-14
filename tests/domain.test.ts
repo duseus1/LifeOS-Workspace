@@ -1,9 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { parseNote, captureNote, taskState, templateTarget, parseHomebase, updateWidget } from '../src/domain';
+import { parseNote, captureNote, taskState, templateTarget, parseHomebase, updateWidget, formatPhone } from '../src/domain';
 describe('daily behavior', () => {
  it('captures a contact with only a phone number', () => {
   const note = parseNote(captureNote('contact', {phone:'555-0101'}));
   expect(note.properties.phone).toBe('555-0101'); expect(note.properties.type).toBe('contact');
+ });
+ it('formats North American contact numbers without changing other formats', () => {
+  expect(formatPhone('(202) 555 0100')).toBe('202-555-0100');
+  expect(formatPhone('1 202 555 0100')).toBe('+1 202-555-0100');
+  expect(formatPhone('+1 (202) 555-0100')).toBe('+1 202-555-0100');
+  expect(formatPhone('+44 20 7946 0958')).toBe('+44 20 7946 0958');
+  expect(formatPhone('202-555-0100 x123')).toBe('202-555-0100 x123');
+  expect(parseNote(captureNote('contact',{name:'Alex',phone:'12025550100'})).properties.phone).toBe('+1 202-555-0100');
  });
  it('rejects empty contacts and unsafe links', () => {
   expect(()=>captureNote('contact', {})).toThrow();

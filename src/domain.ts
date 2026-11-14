@@ -5,6 +5,14 @@ export type Widget = {id:string; type:string; width?:'half'|'full'; hidden?:bool
 export type Pin = {label:string; path?:string; template?:string; folder?:string; pattern?:string; period?:string};
 export type Section = {raw:string; text?:string; widget?:Widget; error?:string};
 export function localDate(date=new Date()):string { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+export function formatPhone(value:string):string {
+ const raw=value.trim();
+ if(!raw||/[a-zA-Z#;]/.test(raw))return raw;
+ const digits=raw.replace(/\D/g,'');
+ if(digits.length===10&&!raw.startsWith('+'))return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+ if(digits.length===11&&digits.startsWith('1'))return `+1 ${digits.slice(1,4)}-${digits.slice(4,7)}-${digits.slice(7)}`;
+ return raw;
+}
 export function parseNote(content:string):{properties:Properties; body:string} {
  const match=content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
  if(!match)return {properties:{},body:content};
@@ -18,6 +26,7 @@ export function patchProperties(content:string, patch:Properties):string {
 export function captureNote(type:CaptureType, fields:Properties):string {
  const f=Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,typeof v==='string'?v.trim():v]).filter(([,v])=>v!==''&&v!==undefined));
  if(type==='contact'&&!['name','phone','email'].some(k=>f[k]))throw Error('Enter a name, phone number, or email.');
+ if(type==='contact'&&f.phone)f.phone=formatPhone(String(f.phone));
  if(type==='link'){let url:URL;try{url=new URL(f.url);}catch{throw Error('Enter a valid website URL.');}if(!['http:','https:'].includes(url.protocol))throw Error('Use an HTTP or HTTPS URL.');}
  if(type==='event'&&(!f.title||!f.date||(!f.allDay&&!f.time)))throw Error('Add a title, date, and time, or choose all-day.');
  if(['thought','task','reminder'].includes(type)&&!f.title&&!f.text)throw Error('Write something before saving.');
@@ -48,7 +57,7 @@ export function parseHomebase(content:string):Section[] {
 export function updateWidget(content:string,id:string,patch:Partial<Widget>) {return parseHomebase(content).map(s=>s.widget?.id===id?`\`\`\`lifeos\n${JSON.stringify({...s.widget,...patch},null,2)}\n\`\`\``:s.raw).join('');}
 export function moveWidget(content:string,id:string,direction:-1|1) {const sections=parseHomebase(content);const positions=sections.map((s,i)=>s.widget?i:-1).filter(i=>i>=0);const at=positions.findIndex(i=>sections[i].widget?.id===id);const other=at+direction;if(other>=0&&other<positions.length){const a=positions[at],b=positions[other];[sections[a],sections[b]]=[sections[b],sections[a]];}return sections.map(s=>s.raw).join('');}
 export const defaultHomebase=`# Homebase\n\nA little space for everything on your mind.\n\n\`\`\`lifeos\n{"id":"tasks","type":"tasks","width":"half"}\n\`\`\`\n\n\`\`\`lifeos\n{"id":"reminders","type":"reminders","width":"half"}\n\`\`\`\n\n\`\`\`lifeos\n{"id":"calendar","type":"calendar","width":"full"}\n\`\`\`\n\n\`\`\`lifeos\n{"id":"quick-notes","type":"quick-notes","width":"full","pins":[{"label":"Daily journal","template":"Templates/Daily journal.md","folder":"Journal","pattern":"{{date}}","period":"daily"}]}\n\`\`\`\n`;
-export function titleOf(path:string,content:string){const note=parseNote(content);return String(note.properties.title||note.body.match(/^#\s+(.+)$/m)?.[1]||path.split('/').pop()?.replace(/\.md$/,''));}
+export function titleOf(path:string,content:string){const note=parseNote(content);const title=String(note.properties.title||note.body.match(/^#\s+(.+)$/m)?.[1]||path.split('/').pop()?.replace(/\.md$/,''));return note.properties.type==='contact'&&note.properties.phone===title?formatPhone(title):title;}
 
 export function eventWhen(p:Properties,timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone):{date:string;time:string}{
  if(p.allDay||!p.startsAt)return {date:p.date||'',time:p.allDay?'':p.time||''};
