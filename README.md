@@ -1,6 +1,6 @@
 # LifeOS
 
-LifeOS is a local personal workspace for Markdown notes, tasks, reminders, events, contacts, and project homebases. The approved product roadmap is in [LIFEOS_PLAN.md](LIFEOS_PLAN.md). The current build is a Mac development alpha; [implementation status](docs/IMPLEMENTATION_STATUS.md) records what is working and what remains.
+LifeOS is a local personal workspace for Markdown notes, tasks, reminders, events, contacts, and project homebases. The approved product roadmap is in [LIFEOS_PLAN.md](LIFEOS_PLAN.md). The current build is a development alpha; [implementation status](docs/IMPLEMENTATION_STATUS.md) records what is working and what remains. [Versioning](VERSIONING.md) explains the v1, minor, and patch release rules.
 
 ## Run on Mac
 
